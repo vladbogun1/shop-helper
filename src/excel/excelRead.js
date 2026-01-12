@@ -36,27 +36,35 @@ export function readNormalizedData(workbook) {
   const shipments = readSheet('Shipments');
   const meta = readSheet('Meta');
 
+  const pick = (item, keys) => {
+    for (const key of keys) {
+      if (item[key] !== undefined) {
+        return item[key];
+      }
+    }
+    return '';
+  };
+
   return {
     products: products.map((item) => ({
-      product_id: String(item.product_id || ''),
-      name: String(item.name || ''),
-      sku: String(item.sku || ''),
-      active: String(item.active || 'TRUE').toUpperCase() === 'TRUE',
+      product_id: String(pick(item, ['product_id', 'ID товара', 'ID продукта']) || ''),
+      name: String(pick(item, ['name', 'Название']) || ''),
+      active: String(pick(item, ['active', 'Активен']) || 'TRUE').toUpperCase() === 'TRUE',
     })),
     sizes: sizes.map((item) => ({
-      size_id: String(item.size_id || ''),
-      length_mm: Number(item.length_mm || 0),
-      pack_qty: Number(item.pack_qty || 1),
-      label: String(item.label || ''),
-      sort: Number(item.sort || item.length_mm || 0),
+      size_id: String(pick(item, ['size_id', 'ID размера']) || ''),
+      length_mm: Number(pick(item, ['length_mm', 'Длина (мм)']) || 0),
+      pack_qty: Number(pick(item, ['pack_qty', 'Кол-во в упаковке']) || 1),
+      label: String(pick(item, ['label', 'Label', 'Название размера']) || ''),
+      sort: Number(pick(item, ['sort', 'Сортировка']) || pick(item, ['length_mm', 'Длина (мм)']) || 0),
     })),
     shipments: shipments.map((item) => ({
-      shipment_id: String(item.shipment_id || ''),
-      date: String(item.date || ''),
-      product_id: String(item.product_id || ''),
-      size_id: String(item.size_id || ''),
-      qty: Number(item.qty || 0),
-      comment: String(item.comment || ''),
+      shipment_id: String(pick(item, ['shipment_id', 'ID отгрузки']) || ''),
+      date: String(pick(item, ['date', 'Дата']) || ''),
+      product_id: String(pick(item, ['product_id', 'ID товара', 'ID продукта']) || ''),
+      size_id: String(pick(item, ['size_id', 'ID размера']) || ''),
+      qty: Number(pick(item, ['qty', 'Количество']) || 0),
+      comment: String(pick(item, ['comment', 'Комментарий']) || ''),
     })),
     meta: meta.reduce((acc, item) => {
       if (item.key) {

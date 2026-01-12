@@ -16,14 +16,13 @@ export function renderProductsPage({ state, setState, showToast }) {
     </div>
     <div class="form-grid">
       <div class="field">
-        <label>Поиск по имени или SKU</label>
-        <input type="text" id="productSearch" placeholder="Например, Кабель" />
+        <label>Поиск по названию</label>
+        <input type="text" id="productSearch" placeholder="Например, Труба" />
       </div>
       <div class="field">
         <label>Сортировка</label>
         <select id="productSort">
           <option value="name">По имени</option>
-          <option value="sku">По SKU</option>
         </select>
       </div>
     </div>
@@ -44,7 +43,7 @@ export function renderProductsPage({ state, setState, showToast }) {
     const filtered = state.products
       .filter((product) => {
         const term = searchTerm.toLowerCase();
-        return product.name.toLowerCase().includes(term) || product.sku.toLowerCase().includes(term);
+        return product.name.toLowerCase().includes(term);
       })
       .sort((a, b) => String(a[sortBy]).localeCompare(String(b[sortBy])));
 
@@ -57,7 +56,6 @@ export function renderProductsPage({ state, setState, showToast }) {
           <tr>
             <th>ID</th>
             <th>Название</th>
-            <th>SKU</th>
             <th>Статус</th>
             <th></th>
           </tr>
@@ -67,7 +65,6 @@ export function renderProductsPage({ state, setState, showToast }) {
             <tr>
               <td>${product.product_id}</td>
               <td>${product.name}</td>
-              <td>${product.sku || '<span class="badge muted">нет</span>'}</td>
               <td>${product.active ? '<span class="badge success">Активен</span>' : '<span class="badge muted">Отключён</span>'}</td>
               <td class="table-actions">
                 <button class="btn ghost" data-edit="${product.product_id}">Edit</button>
@@ -116,10 +113,6 @@ export function renderProductsPage({ state, setState, showToast }) {
         <label>Название</label>
         <input type="text" id="productName" value="${product.name}" />
       </div>
-      <div class="field">
-        <label>SKU</label>
-        <input type="text" id="productSku" value="${product.sku}" />
-      </div>
     `;
 
     openModal({
@@ -135,8 +128,7 @@ export function renderProductsPage({ state, setState, showToast }) {
               showToast('Название обязательно', 'warning');
               return;
             }
-            const sku = form.querySelector('#productSku').value.trim();
-            const nextState = updateProduct(state, productId, { name, sku });
+            const nextState = updateProduct(state, productId, { name });
             await setState(nextState);
             closeModal();
             showToast('Товар обновлён', 'success');
@@ -171,11 +163,7 @@ export function renderProductsPage({ state, setState, showToast }) {
     form.innerHTML = `
       <div class="field">
         <label>Название</label>
-        <input type="text" id="productName" placeholder="Например, Кабель" />
-      </div>
-      <div class="field">
-        <label>SKU</label>
-        <input type="text" id="productSku" placeholder="SKU" />
+        <input type="text" id="productName" placeholder="Например, Труба" />
       </div>
     `;
 
@@ -192,8 +180,7 @@ export function renderProductsPage({ state, setState, showToast }) {
               showToast('Название обязательно', 'warning');
               return;
             }
-            const sku = form.querySelector('#productSku').value.trim();
-            const nextState = addProduct(state, { name, sku, active: true });
+            const nextState = addProduct(state, { name, active: true });
             await setState(nextState);
             closeModal();
             showToast('Товар добавлен', 'success');

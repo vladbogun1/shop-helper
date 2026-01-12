@@ -59,7 +59,7 @@ npx serve
 4. Нажмите **Download Excel** или **Export reports to Excel**, чтобы скачать обновлённый файл.
 
 ## Формат Excel (нормализованный)
-- **Products**: product_id, name, sku, active
+- **Products**: product_id, name, active
 - **Sizes**: size_id, length_mm, pack_qty, label, sort
 - **Shipments**: shipment_id, date, product_id, size_id, qty, comment
 - **Reports_MonthlyPivot**: product_name, size_label, YYYY-MM..., total

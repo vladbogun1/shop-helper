@@ -4,7 +4,6 @@ export function addProduct(state, payload) {
   const product = {
     product_id: nextProductId(state.products),
     name: payload.name.trim(),
-    sku: payload.sku?.trim() || '',
     active: payload.active ?? true,
   };
   return {
@@ -28,7 +27,6 @@ export function deleteProduct(state, productId) {
   return {
     ...state,
     products: state.products.filter((product) => product.product_id !== productId),
-    sizes: state.sizes.filter((size) => size.product_id !== productId),
     shipments: state.shipments.filter((shipment) => shipment.product_id !== productId),
   };
 }
