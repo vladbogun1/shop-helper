@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sales Excel Assistant</title>
+  <link rel="stylesheet" href="styles/main.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">SEA</div>
+        <div>
+          <div class="brand-title">Sales Excel Assistant</div>
+          <div class="brand-subtitle">Локальный Excel-менеджер</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="nav-link active" data-route="import">Импорт / Экспорт</button>
+        <button class="nav-link" data-route="products">Товары</button>
+        <button class="nav-link" data-route="sizes">Размеры</button>
+        <button class="nav-link" data-route="shipments">Отгрузки</button>
+        <button class="nav-link" data-route="reports">Отчёты</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="status-pill" id="storageStatus">Хранилище: ...</div>
+        <div class="hint">GitHub Pages ready</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="main-header">
+        <div>
+          <h1 id="pageTitle">Импорт / Экспорт</h1>
+          <p id="pageSubtitle">Загрузите Excel и начните работу.</p>
+        </div>
+        <div class="header-actions" id="headerActions"></div>
+      </header>
+
+      <section id="pageContainer"></section>
+    </main>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+  <div id="modalRoot" class="modal-root hidden"></div>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
