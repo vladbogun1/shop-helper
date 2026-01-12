@@ -141,7 +141,7 @@ export function renderProductsPage({ state, setState, showToast }) {
   const confirmDelete = (productId) => {
     openModal({
       title: 'Подтвердите удаление',
-      content: `<p>Удалить товар и все связанные размеры/отгрузки?</p>`,
+      content: `<p>Удалить товар и все связанные отгрузки?</p>`,
       actions: [
         {
           label: 'Удалить',

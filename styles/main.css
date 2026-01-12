@@ -1,10 +1,12 @@
 :root {
   color-scheme: light;
-  --bg: #f6f7fb;
+  --bg: #f4f6fb;
   --surface: #ffffff;
   --surface-muted: #f0f2f6;
   --primary: #2f5bff;
   --primary-dark: #1d3ccc;
+  --primary-soft: rgba(47, 91, 255, 0.12);
+  --accent: #8b5cf6;
   --text: #101828;
   --text-muted: #667085;
   --border: #e4e7ec;
@@ -36,7 +38,7 @@ body {
 }
 
 .sidebar {
-  background: var(--surface);
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%);
   border-right: 1px solid var(--border);
   padding: 24px;
   display: flex;
@@ -89,9 +91,10 @@ body {
 }
 
 .nav-link.active {
-  background: var(--surface-muted);
+  background: var(--primary-soft);
   color: var(--text);
   border-color: var(--border);
+  box-shadow: inset 3px 0 0 var(--primary);
 }
 
 .sidebar-footer {
@@ -125,6 +128,12 @@ body {
 }
 
 .main-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.main-header h1 {
   font-size: 24px;
 }
 
@@ -149,6 +158,19 @@ body {
   box-shadow: var(--shadow);
   padding: 20px;
   border: 1px solid var(--border);
+  position: relative;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  opacity: 0.6;
 }
 
 .card-header {
@@ -169,6 +191,7 @@ body {
   background: var(--surface);
   cursor: pointer;
   font-weight: 500;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
 
 .btn.primary {
@@ -179,10 +202,16 @@ body {
 
 .btn.primary:hover {
   background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 14px rgba(47, 91, 255, 0.2);
 }
 
 .btn.ghost {
   background: transparent;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
 }
 
 .btn.danger {
@@ -237,7 +266,7 @@ body {
   font-weight: 600;
   position: sticky;
   top: 0;
-  background: var(--surface);
+  background: #f8f9ff;
 }
 
 .table-actions {
