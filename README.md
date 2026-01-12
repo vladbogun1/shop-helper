@@ -60,7 +60,7 @@ npx serve
 
 ## Формат Excel (нормализованный)
 - **Products**: product_id, name, sku, active
-- **Sizes**: size_id, product_id, length_mm, pack_qty, label, sort
+- **Sizes**: size_id, length_mm, pack_qty, label, sort
 - **Shipments**: shipment_id, date, product_id, size_id, qty, comment
 - **Reports_MonthlyPivot**: product_name, size_label, YYYY-MM..., total
 - **Meta**: key, value

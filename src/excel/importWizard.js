@@ -56,14 +56,13 @@ export function buildStateFromLegacy(legacyData, startYear) {
       });
     }
 
-    const sizeKey = `${productId}__${sizeLabel}`;
+    const sizeKey = sizeLabel.toLowerCase();
     let sizeId = sizeMap.get(sizeKey);
     if (!sizeId) {
       sizeId = nextSizeId(sizes);
       sizeMap.set(sizeKey, sizeId);
       sizes.push({
         size_id: sizeId,
-        product_id: productId,
         length_mm: 0,
         pack_qty: 1,
         label: sizeLabel,

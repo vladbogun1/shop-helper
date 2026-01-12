@@ -45,7 +45,6 @@ export function readNormalizedData(workbook) {
     })),
     sizes: sizes.map((item) => ({
       size_id: String(item.size_id || ''),
-      product_id: String(item.product_id || ''),
       length_mm: Number(item.length_mm || 0),
       pack_qty: Number(item.pack_qty || 1),
       label: String(item.label || ''),

@@ -1,4 +1,4 @@
-import { addSize, updateSize, deleteSize, listSizesByProduct } from '../../domain/sizesStore.js';
+import { addSize, updateSize, deleteSize, listSizes } from '../../domain/sizesStore.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { paginate, renderPagination } from '../components/pagination.js';
 import { debounce } from '../utils.js';
@@ -11,17 +11,13 @@ export function renderSizesPage({ state, setState, showToast }) {
   controlsCard.className = 'card';
   controlsCard.innerHTML = `
     <div class="card-header">
-      <div class="card-title">Размеры</div>
+      <div class="card-title">Размерные шаблоны</div>
       <button class="btn primary" id="addSize">Добавить размер</button>
     </div>
     <div class="form-grid">
       <div class="field">
-        <label>Поиск товара</label>
-        <input type="text" id="productSearch" placeholder="Начните вводить..." />
-      </div>
-      <div class="field">
-        <label>Товар</label>
-        <select id="productSelect"></select>
+        <label>Поиск по label</label>
+        <input type="text" id="sizeSearch" placeholder="Например, 50 мм" />
       </div>
       <div class="field">
         <label>Генератор</label>
@@ -37,31 +33,12 @@ export function renderSizesPage({ state, setState, showToast }) {
 
   container.append(controlsCard, tableCard);
 
-  let selectedProductId = state.products[0]?.product_id || '';
   let page = 1;
-  let productSearch = '';
-
-  const updateProductSelect = () => {
-    const select = controlsCard.querySelector('#productSelect');
-    const filtered = state.products.filter((product) =>
-      product.name.toLowerCase().includes(productSearch.toLowerCase())
-    );
-    select.innerHTML = filtered
-      .map((product) => `<option value="${product.product_id}">${product.name}</option>`)
-      .join('');
-    if (!filtered.find((product) => product.product_id === selectedProductId)) {
-      selectedProductId = filtered[0]?.product_id || '';
-    }
-    select.value = selectedProductId;
-    renderTable();
-  };
+  let searchTerm = '';
 
   const renderTable = () => {
-    if (!selectedProductId) {
-      tableWrapper.innerHTML = '<p class="hint">Добавьте товары, чтобы управлять размерами.</p>';
-      return;
-    }
-    const sizes = listSizesByProduct(state, selectedProductId);
+    const sizes = listSizes(state)
+      .filter((size) => size.label.toLowerCase().includes(searchTerm.toLowerCase()));
     const { items, page: currentPage, totalPages } = paginate(sizes, page, 8);
     page = currentPage;
 
@@ -219,10 +196,6 @@ export function renderSizesPage({ state, setState, showToast }) {
             const pack = Number(form.querySelector('#genPack').value);
             const template = form.querySelector('#genTemplate').value;
 
-            if (!selectedProductId) {
-              showToast('Сначала выберите товар', 'warning');
-              return;
-            }
             if (!step || end < start) {
               showToast('Проверьте параметры', 'warning');
               return;
@@ -234,13 +207,12 @@ export function renderSizesPage({ state, setState, showToast }) {
                 .replace('{mm}', length)
                 .replace('{pack}', pack);
               const exists = nextState.sizes.some((size) =>
-                size.product_id === selectedProductId && size.label === label
+                size.label === label
               );
               if (exists) {
                 continue;
               }
               nextState = addSize(nextState, {
-                product_id: selectedProductId,
                 length_mm: length,
                 pack_qty: pack,
                 label,
@@ -257,21 +229,13 @@ export function renderSizesPage({ state, setState, showToast }) {
     });
   };
 
-  controlsCard.querySelector('#productSearch').addEventListener('input', debounce((event) => {
-    productSearch = event.target.value;
-    updateProductSelect();
+  controlsCard.querySelector('#sizeSearch').addEventListener('input', debounce((event) => {
+    searchTerm = event.target.value;
+    page = 1;
+    renderTable();
   }));
 
-  controlsCard.querySelector('#productSelect').addEventListener('change', (event) => {
-    selectedProductId = event.target.value;
-    renderTable();
-  });
-
   controlsCard.querySelector('#addSize').addEventListener('click', () => {
-    if (!selectedProductId) {
-      showToast('Сначала выберите товар', 'warning');
-      return;
-    }
     const form = document.createElement('div');
     form.className = 'form-grid';
     form.innerHTML = `
@@ -305,7 +269,6 @@ export function renderSizesPage({ state, setState, showToast }) {
             const length = Number(form.querySelector('#sizeLength').value);
             const packQty = Number(form.querySelector('#sizePack').value);
             const nextState = addSize(state, {
-              product_id: selectedProductId,
               length_mm: length,
               pack_qty: packQty,
               label,
@@ -322,11 +285,11 @@ export function renderSizesPage({ state, setState, showToast }) {
 
   controlsCard.querySelector('#openGenerator').addEventListener('click', openGenerator);
 
-  updateProductSelect();
+  renderTable();
 
   return {
     title: 'Размеры',
-    subtitle: 'Управляйте размерной сеткой и пакетными параметрами.',
+    subtitle: 'Шаблоны размеров применяются к любому товару.',
     content: container,
   };
 }

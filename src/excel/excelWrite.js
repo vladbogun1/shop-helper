@@ -9,7 +9,7 @@ export function buildWorkbook(state, reportFilters) {
   const wb = XLSX.utils.book_new();
 
   const productsSheet = sheetFromData(state.products, ['product_id', 'name', 'sku', 'active']);
-  const sizesSheet = sheetFromData(state.sizes, ['size_id', 'product_id', 'length_mm', 'pack_qty', 'label', 'sort']);
+  const sizesSheet = sheetFromData(state.sizes, ['size_id', 'length_mm', 'pack_qty', 'label', 'sort']);
   const shipmentsSheet = sheetFromData(state.shipments, ['shipment_id', 'date', 'product_id', 'size_id', 'qty', 'comment']);
 
   const metaRows = Object.entries(state.meta || {}).map(([key, value]) => ({ key, value }));
@@ -41,7 +41,7 @@ export function downloadWorkbook(workbook, filename = 'sales-excel-assistant.xls
 export function buildTemplateWorkbook() {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, sheetFromData([], ['product_id', 'name', 'sku', 'active']), 'Products');
-  XLSX.utils.book_append_sheet(wb, sheetFromData([], ['size_id', 'product_id', 'length_mm', 'pack_qty', 'label', 'sort']), 'Sizes');
+  XLSX.utils.book_append_sheet(wb, sheetFromData([], ['size_id', 'length_mm', 'pack_qty', 'label', 'sort']), 'Sizes');
   XLSX.utils.book_append_sheet(wb, sheetFromData([], ['shipment_id', 'date', 'product_id', 'size_id', 'qty', 'comment']), 'Shipments');
   XLSX.utils.book_append_sheet(wb, sheetFromData([], ['product_name', 'size_label', 'YYYY-MM', 'total']), 'Reports_MonthlyPivot');
   XLSX.utils.book_append_sheet(wb, sheetFromData([

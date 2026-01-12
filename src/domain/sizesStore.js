@@ -3,7 +3,6 @@ import { nextSizeId } from './ids.js';
 export function addSize(state, payload) {
   const size = {
     size_id: nextSizeId(state.sizes),
-    product_id: payload.product_id,
     length_mm: Number(payload.length_mm),
     pack_qty: Number(payload.pack_qty ?? 1),
     label: payload.label.trim(),
@@ -34,8 +33,6 @@ export function deleteSize(state, sizeId) {
   };
 }
 
-export function listSizesByProduct(state, productId) {
-  return state.sizes
-    .filter((size) => size.product_id === productId)
-    .sort((a, b) => a.sort - b.sort);
+export function listSizes(state) {
+  return state.sizes.sort((a, b) => a.sort - b.sort);
 }

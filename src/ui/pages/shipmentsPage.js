@@ -82,8 +82,7 @@ export function renderShipmentsPage({ state, setState, showToast }) {
   };
 
   const updateSizeSelect = () => {
-    const productId = productSelect.value;
-    const sizes = state.sizes.filter((size) => size.product_id === productId);
+    const sizes = state.sizes;
     sizeSelect.innerHTML = sizes
       .map((size) => `<option value="${size.size_id}">${size.label}</option>`)
       .join('');
