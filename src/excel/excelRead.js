@@ -45,36 +45,47 @@ export function readNormalizedData(workbook) {
     return '';
   };
 
-  return {
-    products: products.map((item) => ({
-      product_id: String(pick(item, ['product_id', 'ID товара', 'ID продукта', '🧾 ID товара']) || ''),
-      name: String(pick(item, ['name', 'Название', '🛒 Название']) || ''),
-      active: (() => {
-        const raw = String(pick(item, ['active', 'Активен', '✅ Активен']) || '').trim().toUpperCase();
-        if (raw === '✅' || raw === 'ДА' || raw === 'TRUE') {
-          return true;
-        }
-        if (raw === '❌' || raw === 'НЕТ' || raw === 'FALSE') {
-          return false;
-        }
-        return raw !== 'FALSE' && raw !== '0';
-      })(),
-    })),
-    sizes: sizes.map((item) => ({
-      size_id: String(pick(item, ['size_id', 'ID размера', '📏 ID размера']) || ''),
-      length_mm: Number(pick(item, ['length_mm', 'Длина (мм)', '📐 Длина (мм)']) || 0),
-      pack_qty: Number(pick(item, ['pack_qty', 'Кол-во в упаковке', '📦 Кол-во в упаковке']) || 1),
-      label: String(pick(item, ['label', 'Label', 'Название размера', '🏷️ Label']) || ''),
-      sort: Number(pick(item, ['sort', 'Сортировка', '↕️ Сортировка']) || pick(item, ['length_mm', 'Длина (мм)', '📐 Длина (мм)']) || 0),
-    })),
-    shipments: shipments.map((item) => ({
+  const normalizedProducts = products.map((item) => ({
+    product_id: String(pick(item, ['product_id', 'ID товара', 'ID продукта', '🧾 ID товара']) || ''),
+    name: String(pick(item, ['name', 'Название', '🛒 Название']) || ''),
+    active: (() => {
+      const raw = String(pick(item, ['active', 'Активен', '✅ Активен']) || '').trim().toUpperCase();
+      if (raw === '✅' || raw === 'ДА' || raw === 'TRUE') {
+        return true;
+      }
+      if (raw === '❌' || raw === 'НЕТ' || raw === 'FALSE') {
+        return false;
+      }
+      return raw !== 'FALSE' && raw !== '0';
+    })(),
+  }));
+  const normalizedSizes = sizes.map((item) => ({
+    size_id: String(pick(item, ['size_id', 'ID размера', '📏 ID размера']) || ''),
+    length_mm: Number(pick(item, ['length_mm', 'Длина (мм)', '📐 Длина (мм)']) || 0),
+    pack_qty: Number(pick(item, ['pack_qty', 'Кол-во в упаковке', '📦 Кол-во в упаковке']) || 1),
+    label: String(pick(item, ['label', 'Label', 'Название размера', '🏷️ Label']) || ''),
+    sort: Number(pick(item, ['sort', 'Сортировка', '↕️ Сортировка']) || pick(item, ['length_mm', 'Длина (мм)', '📐 Длина (мм)']) || 0),
+  }));
+  const productIdByName = new Map(normalizedProducts.map((product) => [product.name, product.product_id]));
+  const sizeIdByLabel = new Map(normalizedSizes.map((size) => [size.label, size.size_id]));
+
+  const normalizedShipments = shipments.map((item) => {
+    const productName = String(pick(item, ['product_name', 'Товар', '🛒 Товар']) || '');
+    const sizeLabel = String(pick(item, ['size_label', 'Размер', '📏 Размер']) || '');
+    return {
       shipment_id: String(pick(item, ['shipment_id', 'ID отгрузки', '🚚 ID отгрузки']) || ''),
       date: String(pick(item, ['date', 'Дата', '📅 Дата']) || ''),
-      product_id: String(pick(item, ['product_id', 'ID товара', 'ID продукта', '🧾 ID товара']) || ''),
-      size_id: String(pick(item, ['size_id', 'ID размера', '📏 ID размера']) || ''),
+      product_id: String(pick(item, ['product_id', 'ID товара', 'ID продукта', '🧾 ID товара']) || productIdByName.get(productName) || ''),
+      size_id: String(pick(item, ['size_id', 'ID размера', '📏 ID размера']) || sizeIdByLabel.get(sizeLabel) || ''),
       qty: Number(pick(item, ['qty', 'Количество', '🔢 Количество']) || 0),
       comment: String(pick(item, ['comment', 'Комментарий', '💬 Комментарий']) || ''),
-    })),
+    };
+  });
+
+  return {
+    products: normalizedProducts,
+    sizes: normalizedSizes,
+    shipments: normalizedShipments,
     meta: meta.reduce((acc, item) => {
       const key = pick(item, ['key', 'Ключ', '🔧 Ключ']);
       if (key) {
