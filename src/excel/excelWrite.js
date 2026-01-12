@@ -14,10 +14,29 @@ function applySheetLayout(sheet, headers) {
   }
 }
 
+function applyDataValidation(sheet, validations) {
+  sheet['!dataValidation'] = validations;
+}
+
+function columnLetter(index) {
+  let result = '';
+  let column = index + 1;
+  while (column > 0) {
+    const modulo = (column - 1) % 26;
+    result = String.fromCharCode(65 + modulo) + result;
+    column = Math.floor((column - 1) / 26);
+  }
+  return result;
+}
+
 export function buildWorkbook(state, reportFilters) {
   const wb = XLSX.utils.book_new();
 
-  const productsSheet = sheetFromData(state.products, [
+  const productsData = state.products.map((product) => ({
+    ...product,
+    active: product.active ? '✅' : '❌',
+  }));
+  const productsSheet = sheetFromData(productsData, [
     { key: 'product_id', label: '🧾 ID товара', width: 14 },
     { key: 'name', label: '🛒 Название', width: 32 },
     { key: 'active', label: '✅ Активен', width: 12 },
@@ -74,12 +93,14 @@ export function buildWorkbook(state, reportFilters) {
     { key: 'size_label', label: '📏 Размер', width: 22 },
     ...report.monthKeys.map((month) => ({ key: month, label: `📆 ${month}`, width: 12 })),
     { key: 'total', label: '✅ Итого', width: 12 },
+    { key: 'spark', label: '📈 График', width: 18 },
   ];
   const reportRows = report.rows.map((row) => ({
     product_name: row.product_name,
     size_label: row.size_label,
     ...row.totals,
     total: row.total,
+    spark: '',
   }));
   const reportSheet = sheetFromData(reportRows, reportHeaders);
   applySheetLayout(reportSheet, reportHeaders);
@@ -90,6 +111,45 @@ export function buildWorkbook(state, reportFilters) {
   XLSX.utils.book_append_sheet(wb, reportSheet, 'Reports_MonthlyPivot');
   XLSX.utils.book_append_sheet(wb, metaSheet, 'Meta');
 
+  const monthStartIndex = 2;
+  const monthEndIndex = monthStartIndex + report.monthKeys.length - 1;
+  const sparkColumnIndex = reportHeaders.length - 1;
+  if (report.monthKeys.length > 0) {
+    report.rows.forEach((_, index) => {
+      const rowIndex = index + 1;
+      const sparkCell = XLSX.utils.encode_cell({ r: rowIndex, c: sparkColumnIndex });
+      const startCell = `${columnLetter(monthStartIndex)}${rowIndex + 1}`;
+      const endCell = `${columnLetter(monthEndIndex)}${rowIndex + 1}`;
+      reportSheet[sparkCell] = {
+        t: 'n',
+        f: `SPARKLINE(${startCell}:${endCell},"charttype","column")`,
+      };
+    });
+  }
+  reportSheet['!ref'] = reportSheet['!ref'] || XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: reportRows.length, c: reportHeaders.length - 1 } });
+  applyDataValidation(shipmentsSheet, [
+    {
+      type: 'list',
+      allowBlank: 1,
+      sqref: `C2:C1000`,
+      formula1: '=Products!$A$2:$A$1000',
+      showErrorMessage: true,
+      showInputMessage: true,
+      promptTitle: 'ID товара',
+      prompt: 'Выберите ID товара из списка Products.',
+    },
+    {
+      type: 'list',
+      allowBlank: 1,
+      sqref: `D2:D1000`,
+      formula1: '=Sizes!$A$2:$A$1000',
+      showErrorMessage: true,
+      showInputMessage: true,
+      promptTitle: 'ID размера',
+      prompt: 'Выберите ID размера из списка Sizes.',
+    },
+  ]);
+
   return wb;
 }
 
@@ -99,11 +159,12 @@ export function downloadWorkbook(workbook, filename = 'sales-excel-assistant.xls
 
 export function buildTemplateWorkbook() {
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, sheetFromData([], [
+  const productsTemplate = sheetFromData([], [
     { key: 'product_id', label: '🧾 ID товара', width: 14 },
     { key: 'name', label: '🛒 Название', width: 32 },
     { key: 'active', label: '✅ Активен', width: 12 },
-  ]), 'Products');
+  ]);
+  XLSX.utils.book_append_sheet(wb, productsTemplate, 'Products');
   const sizesTemplate = sheetFromData([], [
     { key: 'size_id', label: '📏 ID размера', width: 14 },
     { key: 'length_mm', label: '📐 Длина (мм)', width: 16 },
@@ -126,6 +187,7 @@ export function buildTemplateWorkbook() {
     { key: 'size_label', label: '📏 Размер', width: 22 },
     { key: 'YYYY-MM', label: '📆 YYYY-MM', width: 12 },
     { key: 'total', label: '✅ Итого', width: 12 },
+    { key: 'spark', label: '📈 График', width: 18 },
   ]);
   XLSX.utils.book_append_sheet(wb, reportTemplate, 'Reports_MonthlyPivot');
   const metaTemplate = sheetFromData([
@@ -161,10 +223,33 @@ export function buildTemplateWorkbook() {
     { width: 22 },
     { width: 12 },
     { width: 12 },
+    { width: 18 },
   ]);
   applySheetLayout(wb.Sheets.Meta, [
     { width: 18 },
     { width: 32 },
+  ]);
+  applyDataValidation(wb.Sheets.Shipments, [
+    {
+      type: 'list',
+      allowBlank: 1,
+      sqref: `C2:C1000`,
+      formula1: '=Products!$A$2:$A$1000',
+      showErrorMessage: true,
+      showInputMessage: true,
+      promptTitle: 'ID товара',
+      prompt: 'Выберите ID товара из списка Products.',
+    },
+    {
+      type: 'list',
+      allowBlank: 1,
+      sqref: `D2:D1000`,
+      formula1: '=Sizes!$A$2:$A$1000',
+      showErrorMessage: true,
+      showInputMessage: true,
+      promptTitle: 'ID размера',
+      prompt: 'Выберите ID размера из списка Sizes.',
+    },
   ]);
   return wb;
 }

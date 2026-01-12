@@ -49,7 +49,16 @@ export function readNormalizedData(workbook) {
     products: products.map((item) => ({
       product_id: String(pick(item, ['product_id', 'ID товара', 'ID продукта', '🧾 ID товара']) || ''),
       name: String(pick(item, ['name', 'Название', '🛒 Название']) || ''),
-      active: String(pick(item, ['active', 'Активен', '✅ Активен']) || 'TRUE').toUpperCase() === 'TRUE',
+      active: (() => {
+        const raw = String(pick(item, ['active', 'Активен', '✅ Активен']) || '').trim().toUpperCase();
+        if (raw === '✅' || raw === 'ДА' || raw === 'TRUE') {
+          return true;
+        }
+        if (raw === '❌' || raw === 'НЕТ' || raw === 'FALSE') {
+          return false;
+        }
+        return raw !== 'FALSE' && raw !== '0';
+      })(),
     })),
     sizes: sizes.map((item) => ({
       size_id: String(pick(item, ['size_id', 'ID размера', '📏 ID размера']) || ''),

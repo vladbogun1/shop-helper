@@ -252,6 +252,9 @@ body {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .table th,
@@ -267,6 +270,14 @@ body {
   position: sticky;
   top: 0;
   background: #f8f9ff;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #f9faff;
+}
+
+.table tbody tr:hover {
+  background: rgba(47, 91, 255, 0.06);
 }
 
 .table-actions {
